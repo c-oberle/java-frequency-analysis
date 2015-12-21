@@ -1,0 +1,6 @@
+# Counting projects using C#
+p: Project = input;
+counts: output sum of int;
+
+foreach (i: int; match(`^c#$`, lowercase(p.programming_languages[i])))
+	counts << 1;
