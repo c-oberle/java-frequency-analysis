@@ -1,0 +1,47 @@
+# Count occurrences of for/do/while loops in Java projects
+p: Project = input;
+counts: output sum[string] of int;
+cur_loop_kind: string;
+
+visit(p, visitor {
+	before n: Project -> {
+		ifall (i: int; !match(`^java$`, lowercase(n.programming_languages[i]))) 
+			stop;
+	}
+	before node: Declaration -> {
+		foreach (i: int; node.methods[i])
+			visit(node.methods[i]);
+		foreach (i: int; node.nested_declarations[i])
+			visit(node.nested_declarations[i]);
+		stop;
+	}
+	before node: Method -> {
+		foreach (i: int; node.statements[i])
+			visit(node.statements[i]);
+		stop;
+	}
+	before node: Statement -> {
+		foreach (i: int; node.statements[i])
+			visit(node.statements[i]);
+		if (def(node.type_declaration))
+			visit(node.type_declaration);
+			
+		switch (node.kind) {
+    		case StatementKind.FOR:
+    			# distinction between 'common' for and foreach
+    			if(def(node.variable_declaration))
+    				cur_loop_kind = "FOREACH";
+    			else
+    				cur_loop_kind = string(node.kind); 				
+				counts[cur_loop_kind] << 1;
+    			break;
+    		case StatementKind.WHILE, StatementKind.DO:
+    		    counts[string(node.kind)] << 1;
+    		default:
+    			break;
+		}
+		stop;
+	}
+
+	before Expression, Modifier -> stop;
+});
