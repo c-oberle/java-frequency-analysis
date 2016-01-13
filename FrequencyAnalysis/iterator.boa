@@ -1,0 +1,58 @@
+# Count explicit usages of iterators in Java projects
+p: Project = input;
+iteratorCount: output sum of int;
+projectCount: output sum of int;
+methodCount: output sum of int;
+statementCount: output sum of int;
+
+# most commonly used iterator types (only for inspection)
+type_name: output top(50) of string weight int;
+
+visit(p, visitor {
+	before n: Project -> {
+		# only consider Java projects
+		ifall (i: int; !match(`^java$`, lowercase(n.programming_languages[i]))) 
+			stop;
+		projectCount << 1;	
+	}
+	before node: Declaration -> {
+		foreach (i: int; node.fields[i])
+			visit(node.fields[i]);
+		foreach (i: int; node.methods[i])
+			visit(node.methods[i]);
+		foreach (i: int; node.nested_declarations[i])
+			visit(node.nested_declarations[i]);
+		stop;
+	}
+	before node: Method -> {
+		methodCount << 1;
+		foreach (i: int; node.statements[i])
+			visit(node.statements[i]);
+		foreach (i: int; node.arguments[i])
+			visit(node.arguments[i]);
+		stop;
+	}
+	before node: Statement -> {
+		statementCount << 1;
+	}
+	# count iterator variable declarations
+	before node: Variable -> {
+		if(match(`^[^<]*Iterator(<.+>)?$`, node.variable_type.name)) {
+			iteratorCount << 1;
+			type_name << node.variable_type.name weight 1;	
+			# stop traversal to	make sure we don't count multiple 
+			# iterator occurrences for a single variable declaration 
+			stop;	
+		}
+	}
+	# count calls to iterator()
+	before node: Expression -> {
+		if(node.kind == ExpressionKind.METHODCALL 
+			and node.method == "iterator" 
+			and len(node.method_args) == 0
+		) {
+			iteratorCount << 1;
+		}
+		stop;	
+	}
+});
