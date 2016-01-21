@@ -5,6 +5,7 @@ cur_loop_kind: string;
 
 visit(p, visitor {
 	before n: Project -> {
+		# only consider Java projects
 		ifall (i: int; !match(`^java$`, lowercase(n.programming_languages[i]))) 
 			stop;
 	}
