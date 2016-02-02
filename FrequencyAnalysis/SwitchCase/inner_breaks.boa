@@ -1,0 +1,43 @@
+# Count switch statements in Java projects which 
+# contain 'inner' breaks. (i.e. breaks which are 
+# inside another branching construct)
+p: Project = input;
+switch_blocks: output sum of int;
+with_inner_breaks: output sum of int;
+
+visit(p, visitor {
+	before node: Project -> {
+		# only consider Java projects 
+		# (i.e., projects that contain at least one java file)
+		ifall (i: int; ! match(`^java$`, lowercase(node.programming_languages[i])))
+			stop;
+	}
+	before node: ChangedFile -> {
+		# only consider java files
+		if(!iskind("SOURCE_JAVA_JLS", node.kind))
+			stop; 
+	}
+	before node: Statement -> {
+		# visit switch blocks
+		if (node.kind == StatementKind.SWITCH) {
+			switch_blocks << 1;
+			
+			visit(node, visitor {
+				before n: Statement -> {
+					# visit if statements inside switch blocks
+					if(n.kind == StatementKind.IF) {
+						# examine whether the if statement contains break 
+						# (at 'top level', because otherwise we would also
+						# count 'irrelevant' breaks, e.g., inside loops)
+						exists (i: int; n.statements[i].kind == StatementKind.BREAK) {
+							with_inner_breaks << 1;
+							stop;
+						}
+					}
+				}
+			});
+			
+			stop;
+		}
+	}
+});

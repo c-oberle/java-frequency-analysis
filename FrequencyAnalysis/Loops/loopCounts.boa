@@ -1,19 +1,13 @@
-# Count occurrences of for/do/while loops in Java projects
+# Count occurrences of for/do/while loops per language
 p: Project = input;
-counts: output sum[string] of int;
+counts: output sum[string][string] of int;
+cur_language: string;
 cur_loop_kind: string;
 
 visit(p, visitor {
-	before n: Project -> {
-		# only consider Java projects 
-		# (i.e., projects that contain at least one java file)
-		ifall (i: int; !match(`^java$`, lowercase(n.programming_languages[i]))) 
-			stop;
-	}
 	before node: ChangedFile -> {
-		# only consider java files
-		if(!iskind("SOURCE_JAVA_JLS", node.kind))
-			stop; 
+		# get language of current file
+		cur_language := string(node.kind);
 	}
 	before node: Declaration -> {
 		foreach (i: int; node.methods[i])
@@ -40,10 +34,10 @@ visit(p, visitor {
     				cur_loop_kind = "FOREACH";
     			else
     				cur_loop_kind = string(node.kind); 				
-				counts[cur_loop_kind] << 1;
+				counts[cur_language[cur_loop_kind]] << 1;
     			break;
     		case StatementKind.WHILE, StatementKind.DO:
-    		    counts[string(node.kind)] << 1;
+    			counts[cur_language[cur_loop_kind]] << 1;
     		default:
     			break;
 		}

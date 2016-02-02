@@ -10,10 +10,16 @@ type_name: output top(50) of string weight int;
 
 visit(p, visitor {
 	before n: Project -> {
-		# only consider Java projects
+		# only consider Java projects 
+		# (i.e., projects that contain at least one java file)
 		ifall (i: int; !match(`^java$`, lowercase(n.programming_languages[i]))) 
 			stop;
 		projectCount << 1;	
+	}
+	before node: ChangedFile -> {
+		# only consider java files
+		if(!iskind("SOURCE_JAVA_JLS", node.kind))
+			stop; 
 	}
 	before node: Declaration -> {
 		foreach (i: int; node.fields[i])
