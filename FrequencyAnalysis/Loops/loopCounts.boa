@@ -34,10 +34,10 @@ visit(p, visitor {
     				cur_loop_kind = "FOREACH";
     			else
     				cur_loop_kind = string(node.kind); 				
-				counts[cur_language[cur_loop_kind]] << 1;
+				counts[cur_language][cur_loop_kind] << 1;
     			break;
     		case StatementKind.WHILE, StatementKind.DO:
-    			counts[cur_language[cur_loop_kind]] << 1;
+    			counts[cur_language][cur_loop_kind] << 1;
     		default:
     			break;
 		}
