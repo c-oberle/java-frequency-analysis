@@ -7,7 +7,7 @@ cur_loop_kind: string;
 visit(p, visitor {
 	before node: ChangedFile -> {
 		# get language of current file
-		cur_language := string(node.kind);
+		cur_language = string(node.kind);
 	}
 	before node: Declaration -> {
 		foreach (i: int; node.methods[i])
