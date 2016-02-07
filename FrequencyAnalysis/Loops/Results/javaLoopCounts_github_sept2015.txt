@@ -1,4 +1,4 @@
-counts[DO] = 3557125
-counts[FOREACH] = 74804900
-counts[FOR] = 126772447
-counts[WHILE] = 48709519
+counts[DO] = 3555945
+counts[FOREACH] = 74800223
+counts[FOR] = 126727693
+counts[WHILE] = 48693050
